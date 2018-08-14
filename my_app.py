@@ -7,6 +7,7 @@ if __name__ == '__main__':
     w = QWidget()
     w.setGeometry(300, 300, 650, 550)
     w.setWindowTitle('Metro Maps')
+    w.setGeometry(300, 350, 650, 550)
     w.show()
 
     sys.exit(app.exec_())
