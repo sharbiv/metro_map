@@ -4,6 +4,8 @@ import tkinter as tk
 from PIL import ImageGrab
 import numpy as np
 import cv2
+import os
+import re
 
 
 class MyWidget(QtWidgets.QWidget):
@@ -24,7 +26,7 @@ class MyWidget(QtWidgets.QWidget):
         )
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         print('Capture the screen...')
-        print('Press q if you want to quit...')
+        print('Press Esc if you want to quit...')
         self.show()
 
     def paintEvent(self, event):
@@ -44,7 +46,7 @@ class MyWidget(QtWidgets.QWidget):
         qp.drawRect(QtCore.QRect(self.begin, self.end))
 
     def keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key_Q:
+        if event.key() == QtCore.Qt.Key_Escape:
             print('Quit')
             self.close()
         event.accept()
@@ -73,8 +75,18 @@ class MyWidget(QtWidgets.QWidget):
         self.is_snipping = False
         self.repaint()
         QtWidgets.QApplication.processEvents()
-        img_name = 'snip{}.png'.format(self.num_snip)
-        img.save(img_name)
+        if not os.path.isdir(os.path.join(os.path.dirname(os.path.realpath(__file__)), "map")):
+            os.makedirs(os.path.join(os.path.dirname(os.path.realpath(__file__)), "map"))
+        else:
+            file_list = os.listdir(os.path.join(os.path.dirname(os.path.realpath(__file__)), "map"))
+            if file_list:
+                regex = re.compile(r'\d+')
+                num_list = []
+                for filename in file_list:
+                    num_list.append(int(regex.findall(filename)[0]))
+                self.num_snip = max(num_list) + 1
+        img_name = 'snip_{}.png'.format(self.num_snip)
+        img.save(os.path.join(os.path.dirname(os.path.realpath(__file__)), "map\{}".format(img_name)))
         print(img_name, 'saved')
         img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
 
@@ -84,8 +96,9 @@ class MyWidget(QtWidgets.QWidget):
 
 
 if __name__ == '__main__':
+# def snip():
     app = QtWidgets.QApplication(sys.argv)
     window = MyWidget()
-    window.show()
+    # window.show()
     app.aboutToQuit.connect(app.deleteLater)
     sys.exit(app.exec_())
